@@ -101,6 +101,7 @@ audio = audio / (np.max(np.abs(audio)) + 1e-9)
 if(input("Salvare il file audio? (y/n): ") .lower() == 'y'):
 
     filename = input("Inserire il nome del file: ")
+    filename = filename + ".wav"
     write(filename, audio_fs, (audio * 32767).astype(np.int16))
     print("File finale salvato:", filename)
 
