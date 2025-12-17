@@ -1,5 +1,7 @@
 ## Trasmission of an Audio File via Pluto SDR
 
+> <span style="color:red">In windows bisogna installare il seguente [driver](https://github.com/analogdevicesinc/plutosdr-m2k-drivers-win/releases/download/v0.7/PlutoSDR-M2k-USB-Drivers.exe) per la pluto </span>
+
 ### Non-encoded AM 
 #### Transmit (Matlab) :
 > Be sure to have installed :
