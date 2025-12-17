@@ -1,6 +1,6 @@
 ## Trasmission of an Audio File via Pluto SDR
 
-> <span style="color:red">In windows bisogna installare il seguente [driver](https://github.com/analogdevicesinc/plutosdr-m2k-drivers-win/releases/download/v0.7/PlutoSDR-M2k-USB-Drivers.exe) per la pluto </span>
+> <span style="color:red">⚠ If you are using windows you must install this [driver](https://github.com/analogdevicesinc/plutosdr-m2k-drivers-win/releases/download/v0.7/PlutoSDR-M2k-USB-Drivers.exe) to be able to communicate with the pluto </span>
 
 ### Non-encoded AM 
 #### Transmit (Matlab) :
@@ -9,19 +9,14 @@
 > - wireless test bench
 
 #### Recieve (Python) :
-> Be sure to have Installed the required libraries (with pip) and use python 3.10 fi you can, ideally in a venv :
+> Be sure to have installed the required libraries and use python 3.10 if you can, ideally in a venv :
 > - numpy
-> - adi
+> - pyadi-iio
 > - sounddevice
 > - scipy
 > - rich
-> - math
-
-> Alternatively you can instal all the required libraries with the script [here](
-
-    pip install numpy
-    pip install adi
-    pip install 
+>
+> Alternatively you can install all of these libraries with this script [autoInstallLibraries.py](/autoInstallLibraries.py)
     
 ---
 
