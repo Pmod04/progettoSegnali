@@ -6,8 +6,11 @@ ampiezza_portante = 0.5;
 gain_tx = -15;
 fc_am = 100e3;
 
-%%CARICAMENTO FILE AUDIO DA TRASMETTERE
-%
+%% LOADING THE AUDIO FILE
+% In this block we load the audio which we will then transmit. 
+% We upload the file and narrow the streaming to a single channel.
+% Then we indicate a time segment we want to broadcast and convert it into samples.
+
 %[audio, fs_audio] = audioread('Smash Mouth - All Star (Official Music Video).mp3');
 %[audio, fs_audio] = audioread('Monsters Inc theme (full).wav');
 [audio, fs_audio] = audioread('Smash-Mouth-All-Star-_Official-Music-Video_.wav');
