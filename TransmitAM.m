@@ -49,11 +49,13 @@ audio_resampled = resample(audio_segment, sample_rate, fs_audio);
 audio_resampled = audio_resampled / (max(abs(audio_resampled))+eps);
 
 %% BASEBAND AM MODULATION
+% This modulation uses the following formula s(t) = carrier amplitude [1+ resampled audio].
+%This was chosen because the code is simpler and cleaner, given that Pluto will then translate the signal to 915 MHz.
+
 txSignal = ampiezza_portante * (1 + audio_resampled); 
 txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione per sicurezza
 txNorm   = complex(txNorm, zeros(size(txNorm)));   % assicuriamo complesso
 
-%%
 
 %t = (0:length(audio_resampled)-1).' / sample_rate;
 %am_modulated = ampiezza_portante * (1 + audio_resampled) .* cos(2*pi*fc_am*t);
