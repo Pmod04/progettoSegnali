@@ -3,10 +3,11 @@ clc; clear;
 fc = 915e6;         %frequenza di campionamento
 sample_rate = 1e6;  
 ampiezza_portante = 0.5;
-gain_tx = -15;%  (max potenza di gain a 0)
+gain_tx = -15;
 fc_am = 100e3;
 
-%CARICAMENTO FILE AUDIO DA TRASMETTERE
+%%CARICAMENTO FILE AUDIO DA TRASMETTERE
+%
 %[audio, fs_audio] = audioread('Smash Mouth - All Star (Official Music Video).mp3');
 %[audio, fs_audio] = audioread('Monsters Inc theme (full).wav');
 [audio, fs_audio] = audioread('Smash-Mouth-All-Star-_Official-Music-Video_.wav');
