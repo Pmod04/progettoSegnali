@@ -50,26 +50,15 @@ audio_resampled = audio_resampled / (max(abs(audio_resampled))+eps);
 
 %% BASEBAND AM MODULATION
 % This modulation uses the following formula s(t) = carrier amplitude [1+ resampled audio].
-%This was chosen because the code is simpler and cleaner, given that Pluto will then translate the signal to 915 MHz.
+% This was chosen because the code is simpler and cleaner, given that Pluto will then translate the signal to 915 MHz.
 
 txSignal = ampiezza_portante * (1 + audio_resampled); 
-txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione per sicurezza
-txNorm   = complex(txNorm, zeros(size(txNorm)));   % assicuriamo complesso
+txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  
+txNorm   = complex(txNorm, zeros(size(txNorm)));   
+% Converts the signal into complex IQ form, because our signal isn't, but is required by the “sdrtx” command.
 
 
-%t = (0:length(audio_resampled)-1).' / sample_rate;
-%am_modulated = ampiezza_portante * (1 + audio_resampled) .* cos(2*pi*fc_am*t);
-
-%txNorm = complex(am_modulated, zeros(size(am_modulated)));
-%txNorm = 0.7 * (txNorm / max(abs(txNorm)));
-
-
-% Segnale complesso IQ puro (parte Q = 0); senza AM banda base
-
-%txSignal = hilbert(audio_resampled); 
-%txNorm = 0.7 * (txSignal / max(abs(txSignal)));
-
-%CONNETTO PLUTO
+%% PLUTO CONNECTION
 tx = sdrtx('Pluto');
 tx.BasebandSampleRate = sample_rate;
 tx.CenterFrequency = fc;
@@ -77,17 +66,15 @@ tx.Gain = gain_tx;
 tx.ShowAdvancedProperties = true;
 
 
-%TRASMETTO SEGNALE AUDIO
+%% AUDIO FINAL TRASMISSION
 transmitRepeat(tx, txNorm);
 
-%block_size = 2048;
-%num_blocks = ceil(length(txNorm)/block_size);
+% This is the most useful way to continuously transmit small audio frames without having to manually manage the buffer.
+% However, to stop transmission, you need to type “release(tx)” in the command window.
 
-%for k = 1:num_blocks
-    %idx = (k-1)*block_size + 1 : min(k*block_size, length(txNorm));
-    %transmit(tx, txNorm(idx));
-%end
-
+% These last two lines check that the resampling is working correctly. 
+% Essentially, I calculate the duration of the audio before and after resampling; 
+% in theory, the duration should remain the same even after increasing the number of samples per second.
 
 disp(length(audio_segment)/fs_audio);
 disp(length(audio_resampled)/sample_rate);
