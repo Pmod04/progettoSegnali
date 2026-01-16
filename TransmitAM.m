@@ -1,7 +1,7 @@
 clc; clear;
 
 fc = 915e6;         %frequenza di campionamento
-sample_rate = 1e6;  
+sample_rate = 1e6;  % sample rate requested by ADALM-Pluto
 ampiezza_portante = 0.5;
 gain_tx = -15;
 fc_am = 100e3;
@@ -11,36 +11,44 @@ fc_am = 100e3;
 % We upload the file and narrow the streaming to a single channel.
 % Then we indicate a time segment we want to broadcast and convert it into samples.
 
-%[audio, fs_audio] = audioread('Smash Mouth - All Star (Official Music Video).mp3');
-%[audio, fs_audio] = audioread('Monsters Inc theme (full).wav');
-[audio, fs_audio] = audioread('Smash-Mouth-All-Star-_Official-Music-Video_.wav');
-audio_mono = mean(audio,2);  % Mono
-start_sec = 37; % aggiungo 37 per far partire la canzone 37 secondi dopo
-dur_sec   = 10;  % questo lo aggiungo per trasmettere solo 10 secondi di
-                  % audio
+% Below I will mark the first case with a 1 and the second with a 2. 
+% The thing in common is the duration of the frame, but the thing that differentiates 
+% the two cases is the starting point of the song.
 
+% In the first case the song starts right away so we put the "start_sec" to 0 (case 1)
+% Unpinn the comments with "case 1" and pinn the "case 2" commands for the first case
+% (1) [audio, fs_audio] = audioread('Monsters Inc theme (full).wav'); 
+
+%IN the second case the song starts 37 seconds after the start of the file because of a inital speech (case 2)
+% (2) [audio, fs_audio] = audioread('Smash Mouth - All Star (Official Music Video).mp3');
+[audio, fs_audio] = audioread('Smash-Mouth-All-Star-_Official-Music-Video_.wav'); % (2)
+audio_mono = mean(audio,2);  % (case 1 and 2)
+start_sec = 37; % I indicate in this variable the starting point from which to transmit (2)
+% (1) start_sec = 0 
+
+% from this point is ok for each of the cases
+dur_sec   = 10;  % this variable stores the stream duration 
 start_sample = round(start_sec * fs_audio);
-% ora faccio un end_sample dove dico alla trasmissione di finire a 47
-% secondi (parto da 37, trasmetto 10 secondi). Infatti poi con
-% audio_segment definisco il segmento di audio da trasmettere 
-
 end_sample   = round((start_sec + dur_sec) * fs_audio);
 audio_segment = audio_mono(start_sample:end_sample); 
 
-%se invece non pongo limiti di durata alla canzone uso questo
-%audio_segment = audio_mono(start_sample:end); 
+% so in the last three lines we sampled the values to create a segment of the file
 
-% UPSAMPLING A 1 MHZ: PORTO LA FREQUENZA DI CAMPIONAMENTO DEL SEGNALE AUDIO
-% A QUELLA RICHIESTA DALLA PLUTO
+%% UPSAMPLING (VERY IMPORTANT !!!)
+% We increased the sampling frequency of the audio signal to that required by the Pluto (1 Mhz)
 
 audio_resampled = resample(audio_segment, sample_rate, fs_audio);
+% it helped us because if you don't put this command (also in rx) the sound will result accelerated
 
-%NORMALIZZO IL SEGNALE AUDIO
+%% NORMALIZING THE AUDIO SIGNAL 
+% Now we normalize the signal for three reasons:
+- to avoid overmodulation
+- to standardize different signals
+- to avoid division by zero
 
 audio_resampled = audio_resampled / (max(abs(audio_resampled))+eps);
 
-%%
-% MOODULO CON MODULAZIONE AM BANDA BASE
+%% BASEBAND AM MODULATION
 txSignal = ampiezza_portante * (1 + audio_resampled); 
 txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione per sicurezza
 txNorm   = complex(txNorm, zeros(size(txNorm)));   % assicuriamo complesso
