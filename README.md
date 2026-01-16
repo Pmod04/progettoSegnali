@@ -13,8 +13,10 @@
 
 > [!warning]
 > Be sure to have installed :
-> - communication toolbox
-> - wireless test bench
+> - Communication Toolbox: required for "sdrtx" command and IQ signal handling
+> - Support package for analog devices: required to see and use the Pluto
+> - Signal Processing Toolbox: required for "resample" and "hilbert" commands
+> - Audio Toolbox: NOT necessary but recommended for better management and reading of different audio file formats
 
 #### Recieve (Python) :
 
