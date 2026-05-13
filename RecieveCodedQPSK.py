@@ -3,111 +3,80 @@ import adi
 import sounddevice as sd
 from scipy.io.wavfile import write
 from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
-from scipy.signal import resample_poly, firwin, lfilter
+from scipy.signal import resample_poly, butter, lfilter
+import matplotlib.pyplot as plt
 import math
 
-# Paramtetri
-duration = 10          # secondi da acquisire
-audio_fs = 48000       # frequenza di uscita audio
-fs_sdr = 1e6          # frequenza di campionamento SDR
-Rs = 1e5              # Rate di simbolo
-sps = int(fs_sdr / Rs)   
-rolloff = 0.35
-Nbits = 8
-audio_fs = 32000
+# --- Parametri ---
+duration = 5          # Ridotto a 5s per test rapido
+audio_fs = 32000      
+fs_sdr = 1000000      
+fc = int(434e6)
 
-# Set parametri SDR
-sdr = adi.Pluto("ip:192.168.3.1")
-sdr.rx_lo = int(915e6)
-sdr.sample_rate = int(1e6)
-sdr.rx_rf_bandwidth = int(1e6)
-sdr.rx_buffer_size = 8192
-sdr.gain_control_mode_chan0 = "manual"
-sdr.rx_hardwaregain_chan0 = 50
+# --- SDR Setup ---
+try:
+    sdr = adi.Pluto("ip:192.168.3.1")
+    sdr.rx_lo = fc
+    sdr.sample_rate = int(fs_sdr)
+    sdr.rx_rf_bandwidth = int(250e3) 
+    sdr.rx_buffer_size = 1024 * 16
+    sdr.gain_control_mode_chan0 = "manual"
+    sdr.rx_hardwaregain_chan0 = 40 
+except Exception as e:
+    print(f"Errore SDR: {e}")
+    exit()
 
-
-# Print debug
-fs_sdr = int(sdr.sample_rate)
-print("Sample rate reale Pluto:", fs_sdr)
-print("Buffer RX:", sdr.rx_buffer_size)
-
-# Acquisizione
-
-samples = []
+# --- Acquisizione ---
 n_buffers = math.ceil(duration * fs_sdr / sdr.rx_buffer_size)
+samples_list = []
+print(f"Ricezione {duration}s su {fc/1e6} MHz...")
 
-print(f"\nAcquisizione prevista: {n_buffers} buffer")
-print("Durata teorica:", duration, "s\n")
-
-with Progress(
-    TextColumn("[progress.description]{task.description}"),
-    BarColumn(bar_width=70, complete_style="green"),
-    TimeRemainingColumn(compact=True)
-) as progress:
-
-    task = progress.add_task("[green]Ricezione in corso...", total=n_buffers)
-
+with Progress(TextColumn("[progress.description]{task.description}"), BarColumn(), TimeRemainingColumn()) as progress:
+    task = progress.add_task("[green]Acquisizione...", total=n_buffers)
     for _ in range(n_buffers):
-        rx = sdr.rx()
-        samples.append(rx)
+        samples_list.append(sdr.rx())
         progress.update(task, advance=1)
 
-samples = np.concatenate(samples)
+iq_samples = np.concatenate(samples_list)
 
+# --- Visualizzazione Spettro ---
+print("Generazione grafici...")
+plt.figure(figsize=(12, 6))
 
-print("\nCampioni acquisiti:", len(samples))
-dur_reale = len(samples) / fs_sdr
-print("Durata effettiva acquisita:", round(dur_reale, 3), "s")
+# Subplot 1: Spettro di frequenza del segnale ricevuto
+plt.subplot(2, 1, 1)
+plt.psd(iq_samples, NFFT=1024, Fs=fs_sdr/1e6, Fc=fc/1e6, color='blue')
+plt.title("Spettro del Segnale Ricevuto (IQ)")
+plt.xlabel("Frequenza [MHz]")
+plt.ylabel("Potenza [dB/Hz]")
 
-# Envelope detection
-am_demod = np.abs(samples)
-am_demod -= np.mean(am_demod)
+# --- Demodulazione FM ---
+# Calcolo frequenza istantanea
+diff_phase = np.angle(iq_samples[1:] * np.conj(iq_samples[:-1]))
 
-# Matched RRC filter
+# Filtro Passa-Basso (15 kHz)
+nyq = 0.5 * fs_sdr
+b, a = butter(5, 15000 / nyq, btype='low')
+audio_filtered = lfilter(b, a, diff_phase)
 
-span = 6
-num_taps = span * sps + 1
-rrc = firwin(num_taps, 1/sps, window=('kaiser', 8))
+# Resampling a 32kHz
+audio_resampled = resample_poly(audio_filtered, audio_fs, fs_sdr)
+audio_resampled /= (np.max(np.abs(audio_resampled)) + 1e-6) # Normalizzazione
 
-rx_filt = np.convolve(samples, rrc, mode='same')
+# Subplot 2: Segnale Audio nel tempo
+plt.subplot(2, 1, 2)
+time_axis = np.linspace(0, len(audio_resampled)/audio_fs, len(audio_resampled))
+plt.plot(time_axis, audio_resampled, color='green')
+plt.title("Segnale Audio Demodulato")
+plt.xlabel("Tempo [s]")
+plt.ylabel("Ampiezza")
+plt.tight_layout()
+plt.show()
 
-#Decisore Qpsk
+# --- Salvataggio/Play ---
+if input("\nSalvare il file .wav? (y/n): ").lower() == 'y':
+    write(input("Nome file: ") + ".wav", audio_fs, (audio_resampled * 32767).astype(np.int16))
 
-offset = np.argmax(np.abs(rx_filt[:sps]))
-symbols = rx_filt[offset::sps]
-bits = []
-
-for s in symbols:
-    bits.append(1 if np.real(s) > 0 else 0)
-    bits.append(1 if np.imag(s) > 0 else 0)
-
-bits = np.array(bits)
-
-#PCM 8bit
-
-bits = bits[:len(bits) - len(bits) % Nbits]
-pcm = np.packbits(bits.reshape(-1, Nbits), axis=1)
-pcm = pcm.flatten().astype(np.uint8)
-
-
-#Decode audio
-
-audio = pcm.astype(np.float32)
-audio = audio / (2**(Nbits-1) - 1) - 1
-
-audio = audio / (np.max(np.abs(audio)) + 1e-9)
-
-
-if(input("Salvare il file audio? (y/n): ") .lower() == 'y'):
-
-    filename = input("Inserire il nome del file: ")
-    filename = filename + ".wav"
-    write(filename, audio_fs, (audio * 32767).astype(np.int16))
-    print("File finale salvato:", filename)
-
-
-if(input("Riprodurre l'audio? (y/n): ") .lower() == 'y'):
-
-    print("Riproduzione...")
-    sd.play(audio, audio_fs)
+if input("Riprodurre l'audio? (y/n): ").lower() == 'y':
+    sd.play(audio_resampled, audio_fs)
     sd.wait()
