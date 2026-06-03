@@ -38,12 +38,13 @@ audio_resampled = resample(audio_segment, sample_rate, fs_audio); % interpola il
 audio_resampled = audio_resampled / (max(abs(audio_resampled))+eps);
 
 %% MODULAZIONE AM BANDA BASE
-%
+% Utilizziamo la modulazione AM classica con tale formula che grazie alla normalizzazione attuata prima permette all'inviluppo di oscillare tra 0 e 2 senza mai scendere sotto lo 0
 txSignal = ampiezza_portante * (1 + audio_resampled); 
-txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione per sicurezza
-txNorm   = complex(txNorm, zeros(size(txNorm)));   % assicuriamo complesso
 
-%%
+txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione di sicurezza per evitare distorsioni hardware (clipping)
+txNorm   = complex(txNorm, zeros(size(txNorm)));   % Forziamo il segnale ad essere comlesso, quindi compatibile ai requisiti della Pluto
+
+
 
 %t = (0:length(audio_resampled)-1).' / sample_rate;
 %am_modulated = ampiezza_portante * (1 + audio_resampled) .* cos(2*pi*fc_am*t);
@@ -57,7 +58,8 @@ txNorm   = complex(txNorm, zeros(size(txNorm)));   % assicuriamo complesso
 %txSignal = hilbert(audio_resampled); 
 %txNorm = 0.7 * (txSignal / max(abs(txSignal)));
 
-%CONNETTO PLUTO
+%% CONFIGURAZIONE HARDWARE (PLUTO)
+
 tx = sdrtx('Pluto');
 tx.BasebandSampleRate = sample_rate;
 tx.CenterFrequency = fc;
@@ -65,8 +67,10 @@ tx.Gain = gain_tx;
 tx.ShowAdvancedProperties = true;
 
 
-%TRASMETTO SEGNALE AUDIO
-transmitRepeat(tx, txNorm);
+%% TRASMISSIONE SEGNALE AUDIO
+%fa si che l'hardware trasmetta questo loop di 10 secondi continuamente e all'infinito via radio, liberando la CPU del computer
+
+transmitRepeat(tx, txNorm); 
 
 %block_size = 2048;
 %num_blocks = ceil(length(txNorm)/block_size);
@@ -76,7 +80,12 @@ transmitRepeat(tx, txNorm);
     %transmit(tx, txNorm(idx));
 %end
 
+% I seguenti valori sono serviti per verificare la correttezza del codice a livello di durata del segmento audio prima e dopo il ricampionamento.
+% Verifica corretta se i due valori a display risultano uguali a 10 secondi.
+
 
 disp(length(audio_segment)/fs_audio);
 disp(length(audio_resampled)/sample_rate);
+
+
 
