@@ -10,36 +10,35 @@ fc_am = 100e3;      %sub portante che serve successivamente
 
 %% CARICAMENTO FILE AUDIO DA TRASMETTERE
 % In questa sezione ci limitiamo a caricare il file audio ed estrarre la porzione di canzone desiderata da trasmettere 
+
 %[audio, fs_audio] = audioread('Smash Mouth - All Star (Official Music Video).mp3');
 %[audio, fs_audio] = audioread('Monsters Inc theme (full).wav');
+
 [audio, fs_audio] = audioread('Smash-Mouth-All-Star-_Official-Music-Video_.wav');
-audio_mono = mean(audio,2);  % Mono
-start_sec = 37; % aggiungo 37 per far partire la canzone 37 secondi dopo
-dur_sec   = 10;  % questo lo aggiungo per trasmettere solo 10 secondi di
-                  % audio
+audio_mono = mean(audio,2);  % operazione di conversione ad un canale mono richiesta dall'AM standard
+start_sec = 37; % definisce punto di partenza della riproduzione audio
+dur_sec   = 10;  % durata totale del frame audio da riprodurre
 
-start_sample = round(start_sec * fs_audio);
-% ora faccio un end_sample dove dico alla trasmissione di finire a 47
-% secondi (parto da 37, trasmetto 10 secondi). Infatti poi con
-% audio_segment definisco il segmento di audio da trasmettere 
-
+%Ora moltiplico i valori appena descritti (in secondi) per la frequenza di campionamento del file trovando gli indici di campionamento del file 
+start_sample = round(start_sec * fs_audio); 
 end_sample   = round((start_sec + dur_sec) * fs_audio);
+
+% ora seleziono usando gli indici di campionamento la porzione del mio array desiderata, nonchè i soli 10 seconi del mio audio desiderati
 audio_segment = audio_mono(start_sample:end_sample); 
 
 %se invece non pongo limiti di durata alla canzone uso questo
 %audio_segment = audio_mono(start_sample:end); 
 
-% UPSAMPLING A 1 MHZ: PORTO LA FREQUENZA DI CAMPIONAMENTO DEL SEGNALE AUDIO
-% A QUELLA RICHIESTA DALLA PLUTO
+%% ADATTAMENTO DEL SEGNALE ALLA PLUTO SDR
+% Prima faccio il procedimento di upsampling, ovvero porto la frequenza di campionamento del file audio a quella richiesta dalla Pluto, che non funzionerebbe altrimenti
+audio_resampled = resample(audio_segment, sample_rate, fs_audio); % interpola il segnale
 
-audio_resampled = resample(audio_segment, sample_rate, fs_audio);
-
-%NORMALIZZO IL SEGNALE AUDIO
+% Ora normalizzo il segnale per garantire la corretta modulazione e nessuna socramodulazione
 
 audio_resampled = audio_resampled / (max(abs(audio_resampled))+eps);
 
-%%
-% MOODULO CON MODULAZIONE AM BANDA BASE
+%% MODULAZIONE AM BANDA BASE
+%
 txSignal = ampiezza_portante * (1 + audio_resampled); 
 txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione per sicurezza
 txNorm   = complex(txNorm, zeros(size(txNorm)));   % assicuriamo complesso
