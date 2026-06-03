@@ -1,12 +1,15 @@
 clc; clear;
 
-fc = 915e6;         %frequenza di campionamento
-sample_rate = 1e6;  
-ampiezza_portante = 0.5;
-gain_tx = -15;%  (max potenza di gain a 0)
-fc_am = 100e3;
+%% DEFINIZIONE PARAMETRI
 
-%CARICAMENTO FILE AUDIO DA TRASMETTERE
+fc = 915e6;         %frequenza della Portante della PLuto --> frequenza radio centrale a cui trasmetterà l'antenna 
+sample_rate = 1e6;  %frequenza di campionamento della Banda Base = è la velocità alla quale la PLuto leggerà i dati digitali per convertirli in analogico
+ampiezza_portante = 0.5; %ampiezza di base della portante da modulare
+gain_tx = -15;      % indica il guadagno dell'amplificatoe di trasmissione, max potenza di gain a 0
+fc_am = 100e3;      %sub portante che serve successivamente 
+
+%% CARICAMENTO FILE AUDIO DA TRASMETTERE
+% In questa sezione ci limitiamo a caricare il file audio ed estrarre la porzione di canzone desiderata da trasmettere 
 %[audio, fs_audio] = audioread('Smash Mouth - All Star (Official Music Video).mp3');
 %[audio, fs_audio] = audioread('Monsters Inc theme (full).wav');
 [audio, fs_audio] = audioread('Smash-Mouth-All-Star-_Official-Music-Video_.wav');
