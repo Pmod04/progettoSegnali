@@ -27,12 +27,12 @@ print("Sample rate reale Pluto:", fs_sdr)
 print("Buffer RX:", sdr.rx_buffer_size)
 
 # Acquisizione
-
 samples = []
 n_buffers = math.ceil(duration * fs_sdr / sdr.rx_buffer_size)
 
 print(f"\nAcquisizione prevista: {n_buffers} buffer")
 print("Durata teorica:", duration, "s\n")
+
 
 with Progress(
     TextColumn("[progress.description]{task.description}"),

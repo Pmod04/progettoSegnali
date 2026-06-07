@@ -6,9 +6,11 @@
 > ⚠ If you are using windows you must install this [driver](https://github.com/analogdevicesinc/plutosdr-m2k-drivers-win/releases/download/v0.7/PlutoSDR-M2k-USB-Drivers.exe) to be able to communicate with the pluto
 
 > [!note]
-> This project uses 192.168.3.1 in the python scripts as the pluto IP address (dafult pluto address is 192.168.2.1)
+> This project uses 192.168.3.1 in the python scripts as the pluto IP address (default pluto address is 192.168.2.1)
 
-### Non-encoded AM 
+---
+
+## Libraries setup
 #### Transmit (Matlab) :
 
 > [!warning]
@@ -20,18 +22,50 @@
 
 #### Recieve (Python) :
 
->[!warning]
-> Be sure to have installed the required libraries and use python 3.10 if you can, ideally in a venv :
-> - numpy
-> - pyadi-iio
-> - sounddevice
-> - scipy
-> - rich
->
-> Alternatively you can install all of these libraries with this script [autoInstallLibraries.py](/autoInstallLibraries.py)
-    
+>[!note]
+> It is recommended to use a python virtual enviroment to run this project, to do so and install all the libraries simply run the commands below one by one
+
+```bash
+python3 -m venv venv
+```
+```bash
+source venv/bin/activate
+```
+```bash
+pip install -r requirements.txt
+```
+
 ---
 
-### Encoded QPKS
-#### Transmit (Matlab) :
+### Non-encoded AM 
+
+#### Matlab (Tx)
+
+1. ...
+
+
+#### Python (Rx)
+
+1. Signal acquisition
+2. Envelope detection
+3. Low-pass filter (nyquist)
+4. Resampling
+5. Normalization
+
+### Encoded FM
+
+#### Matlab (Tx)
+
+1. ...
+
+
+#### Python (Rx)
+
+1. Signal acquisition
+2. Normalize respect to deviation
+3. Low-pass filter
+4. Resampling
+5. Normalization
+6. Decode
+7. Final
 
