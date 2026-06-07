@@ -1,5 +1,0 @@
-numpy
-pyadi-iio
-sounddevice
-scipy
-rich
