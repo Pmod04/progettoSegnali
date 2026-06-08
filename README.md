@@ -2,8 +2,10 @@
     <h1>Trasmission of an Audio File via Pluto SDR</h1>
 </div>
 
+---
+
 > [!caution]
-> ⚠ If you are using windows you must install this [driver](https://github.com/analogdevicesinc/plutosdr-m2k-drivers-win/releases/download/v0.7/PlutoSDR-M2k-USB-Drivers.exe) to be able to communicate with the pluto
+> If you are using windows you must install this [driver](https://github.com/analogdevicesinc/plutosdr-m2k-drivers-win/releases/download/v0.7/PlutoSDR-M2k-USB-Drivers.exe) to be able to communicate with the pluto
 >
 > on linux there should be no need to install anything other than the libraries in the "libraries_install_linux.sh"
 
@@ -26,23 +28,3 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-
----
-
-### Non-encoded AM 
-
-1. Signal acquisition
-2. Envelope detection
-3. Low-pass filter (nyquist)
-4. Resampling
-5. Normalization
-
-### Encoded FM
-
-1. Signal acquisition
-2. Normalize respect to deviation
-3. Low-pass filter
-4. Resampling
-5. Normalization
-6. Decode
-7. Final
