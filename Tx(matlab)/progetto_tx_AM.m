@@ -32,7 +32,7 @@ audio_resampled = resample(audio_segment, sample_rate, fs_audio);
 audio_resampled = audio_resampled / (max(abs(audio_resampled))+eps);
 
 %% ---------------- MODULAZIONE AM BANDA BASE --------------------------------------------------------------------
-% Utilizziamo la modulazione AM classica (compresa fra 0,2 grazie a normalizzazione precedente)
+% Utilizziamo la modulazione AM classica (compresa fra [-1,1] grazie a normalizzazione precedente)
 txSignal = ampiezza_portante * (1 + audio_resampled); 
 
 txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione di sicurezza per evitare distorsioni hardware (clipping)

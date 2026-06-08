@@ -6,7 +6,10 @@
 
 ### Tx(matlab)
 
-
+1. Song loading + resampling
+2. Normalization
+3. AM modulation
+4. Transmission
 
 ### Rx(python)
 
@@ -20,7 +23,13 @@
 
 ### Tx(matlab)
 
-
+1. Song loading + resampling
+2. Normalization
+3. Enconde
+4. Upsample
+5. FM Modulation
+6. Normalize
+7. Transmit
 
 ### Rx(python)
 
