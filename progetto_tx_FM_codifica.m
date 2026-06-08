@@ -1,9 +1,3 @@
-% =========================================================
-%  TX - Trasmissione FM con codifica µ-Law
-%  PlutoSDR - MATLAB
-%  Collega: lato trasmissione
-% =========================================================
-
 clear; clc;
 
 %% Parametri (devono coincidere con il RX Python)
@@ -30,24 +24,25 @@ end
 
 % Normalizzazione in [-1, 1]
 audio_raw = audio_raw / (max(abs(audio_raw)) + 1e-9);
-
-max_seconds = 15; % Restiamo sotto i 16.7s per sicurezza
+max_seconds = 15;
 if length(audio_raw) > max_seconds * audio_fs
     audio_raw = audio_raw(1 : max_seconds * audio_fs);
     fprintf('Audio tagliato a %d secondi per limiti hardware.\n', max_seconds);
 end
 
 fprintf('Audio caricato: %.2f secondi\n', length(audio_raw)/audio_fs);
+
+
 %% Codifica µ-Law
 fprintf('Codifica µ-Law (mu=%d)...\n', mu);
 audio_ulaw = sign(audio_raw) .* log1p(mu * abs(audio_raw)) / log1p(mu);
 
 % Il segnale rimane in [-1, 1] ma con compressione logaritmica
-% Nessuna quantizzazione — rimane analogico (versione semplificata per SDR)
+% Nessuna quantizzazione — rimane analogico
 
 %% Upsample audio -> sample rate SDR
 % Fattore di upsample: fs_sdr / audio_fs = 1e6 / 48000 ≈ 20.83
-% Usiamo resample per avere esattamente fs_sdr campioni/s
+% Usiamo resample per avere esattamente fs_sdr campioni al secondo
 fprintf('Upsample audio a %d Hz...\n', fs_sdr);
 audio_up = resample(audio_ulaw, fs_sdr, audio_fs);
 
@@ -70,7 +65,6 @@ fm_signal = exp(1j * phase);
 fm_signal = fm_signal / max(abs(fm_signal));
 
 %% Configurazione PlutoSDR TX
-fprintf('Configurazione PlutoSDR...\n');
 
 tx = sdrtx('Pluto', ...
     'RadioID',          'usb:0', ...
@@ -78,24 +72,16 @@ tx = sdrtx('Pluto', ...
     'BasebandSampleRate', fs_sdr, ...
     'Gain',             tx_gain);
 
-%% Trasmissione (Corretta)
-fprintf('\nPreparazione buffer complesso...\n');
+%% Trasmissione
 
-% 1. Assicuriamoci che sia un vettore colonna complesso double
+% Assicuriamoci che sia un vettore colonna complesso double
 tx_data = complex(double(fm_signal(:))); 
-
-% 2. Verifica dimensionale (Opzionale ma utile)
-if isreal(tx_data)
-    error('Il segnale è ancora reale! La Pluto richiede I/Q complessi.');
-end
 
 fprintf('Trasmissione in corso su f = %.2f MHz...\n', fc/1e6);
 
-% OPZIONE CONSIGLIATA: Carica tutto il brano e trasmettilo a ripetizione
-% Questo evita l'errore di validazione nel loop
 transmitRepeat(tx, tx_data); 
 
-% Il programma deve rimanere "vivo" per trasmettere
+% Keepalive
 disp('La radio sta trasmettendo. Premi CTRL+C per fermare.');
 pause(length(audio_up)/fs_sdr); % Resta in trasmissione per la durata del brano
 
