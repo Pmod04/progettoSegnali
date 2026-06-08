@@ -2,6 +2,8 @@
     <h1>Trasmission of an Audio File via Pluto SDR</h1>
 </div>
 
+---
+
 ## Non-encoded AM
 
 ### Tx(matlab)
@@ -18,6 +20,8 @@
 3. Low-pass filter (nyquist)
 4. Resampling
 5. Normalization
+
+---
 
 ### Encoded FM
 
