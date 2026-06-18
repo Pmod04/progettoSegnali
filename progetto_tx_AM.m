@@ -36,7 +36,7 @@ audio_resampled = audio_resampled / (max(abs(audio_resampled))+eps);
 txSignal = ampiezza_portante * (1 + audio_resampled); 
 
 txNorm   = 0.7 * (txSignal / max(abs(txSignal)));  % normalizzazione di sicurezza per evitare distorsioni hardware (clipping)
-txNorm   = complex(txNorm, zeros(size(txNorm)));   % Forziamo il segnale ad essere comlesso, quindi compatibile ai requisiti della Pluto
+txNorm   = complex(txNorm, zeros(size(txNorm)));   % Forziamo il segnale ad essere complesso, quindi compatibile ai requisiti della Pluto
 
 
 %% ---------------- CONFIGURAZIONE HARDWARE -----------------------------------------------------------------------
