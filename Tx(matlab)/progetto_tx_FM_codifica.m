@@ -28,7 +28,7 @@ end
 % Normalizzazione in [-1, 1]
 audio_raw = audio_raw / (max(abs(audio_raw)) + 1e-9);
 
-max_seconds = 15; 
+max_seconds = 10; 
 
 if length(audio_raw) > max_seconds * audio_fs
     audio_raw = audio_raw(1 : max_seconds * audio_fs);
