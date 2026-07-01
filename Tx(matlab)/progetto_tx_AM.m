@@ -6,7 +6,6 @@ fc = 915e6;         %frequenza della Portante
 sample_rate = 1e6;  %frequenza di campionamento
 ampiezza_portante = 0.5; %ampiezza di base della portante da modulare
 gain_tx = -15;      %max potenza di gain a 0
-fc_am = 100e3;      %sub portante che serve successivamente 
 
 %% ---------------- CARICAMENTO FILE AUDIO ED ESTRAZIONE  -------------------------------------------------------------------
 
