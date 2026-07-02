@@ -94,8 +94,8 @@ Ora normalizziamo l'audio per avere volume uniforme ed evitare clippin ed infine
 
 Nei test del primo codice abbiamo riscontrato due problemi in particolare: 
 
-- rumore di sottofondo che prevaleva sulla canzone 
-- avelocità di riproduzione audio aumentava con la riproduzione. 
+- rumore di sottofondo che prevale sulla canzone
+- velocità di riproduzione dell'audio che aumenta con il tempo
   
 Per risolvere il primo problema abbiano cambiato la frequenza portante, inizialmente usavamo 2.4GHz ma c'era molta interferenza e optando per i 915 MHz il problema si è risolto
 
@@ -167,4 +167,6 @@ Infine normalizziamo rispetto al picco come prima e poi possiamo salvare e/o rip
 
 ##### Test e problemi riscontrati nella prima parte
 
-Nei test del secondo codice non abbiamo riscontrato problemi
+Nei test del secondo codice abbiamo avuto dei problemi con la trasmissione continua che abbiamo risolto installando dei tool matlab appositi
+
+Avevamo poi un rumore costante in ricezione che abbiamo rimosso tramite i filtri
