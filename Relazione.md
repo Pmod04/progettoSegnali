@@ -111,15 +111,15 @@ La fase iniziale del codice prevede l’implementazione delle variabili globali 
 
 La parte successiva di caricamento dell’audio differisce poco dal codice di trasmissione senza codifica, sono state infatti introdotti solo metodi di controllo per il corretto funzionamento del codice: per esempio un if che converte in mono il canale solo se è in primis doppio o il limite di durata del frame per non sprecare memoria hardware della PlutoSDR.
 
-Prima di modulare il segnale sulla portante, il segnale subisce una compressione logaritmica *(codifica μ-Law)*, implementata tramite la formula: $$F(x) = \operatorname{sgn}(x) \frac{\ln(1 + \mu |x|)}{\ln(1 + \mu)}$$
+Prima di modulare il segnale sulla portante, il segnale subisce una compressione logaritmica *(codifica μ-Law)*, implementata tramite la formula: $$F(x) = \text{sgn}(x) \frac{\ln(1 + \mu |x|)}{\ln(1 + \mu)}$$
 
 In questa configurazione, il segnale mantiene la sua natura continua senza subire una quantizzazione numerica a bit discreti e inoltre comprime la gamma dinamica dell'audio, enfatizzando i campioni a basso volume e attenuando i picchi, migliorando così il rapporto segnale-rumore complessivo sul canale radio.
 Procedo ulteriormente prima della modulazione nel portare il segnale compresso alla frequenza operativa della pluto tramite un upsampling non intero e utilizzando un’operazione di zero padding , il vettore viene allungato con degli zeri fino a diventare un multiplo esatto della dimensione fissa del buffer (buf_size), ottimizzando il lavoro dei processori della PlutoSDR.
 
-La modulazione FM viene eseguita integrando numericamente nel tempo il segnale in banda base per mappare l'informazione sulla fase istantanea della portante complessa: $$\vartheta(t) = \frac{2 \cdot \pi \cdot \Delta f}{fs} \cdot \Sigma  \operatorname{m}(t)$$
+La modulazione FM viene eseguita integrando numericamente nel tempo il segnale in banda base per mappare l'informazione sulla fase istantanea della portante complessa: $$\vartheta(t) = \frac{2 \cdot \pi \cdot \Delta f}{fs} \cdot \Sigma  \text{m}(t)$$
 
 Il segnale viene quindi convertito nella sua rappresentazione equivalente in banda base (IQ) tramite l'esponenziale complesso:
-$$\text{fm}_{\text{signal}} = e ^ {j \cdot \operatorname{\vartheta} (t)}$$
+$$\text{fm}_{\text{signal}} = e ^ {j \cdot \vartheta (t)}$$
 
 Infine, l'inviluppo del segnale IQ viene normalizzato a 1 per rispettare i limiti di input del convertitore digitale-analogico (DAC) della Pluto.
 Detto ciò il penultimo passaggio è quello di configurare l’hardware Pluto tramite la funzione “sdrtx” e infine Il segnale FM viene forzato come vettore colonna di numeri complessi a doppia precisione (double). La trasmissione avviene in modalità continua mediante “transmitRepeat”. Lo script calcola analiticamente la durata esatta del file e impiega la funzione pause per mantenere attivo il processo MATLAB per il tempo necessario alla riproduzione, rilasciando infine la risorsa hardware con il comando release(tx).
@@ -161,7 +161,7 @@ freq_inst    = np.diff(phase_unwrap) / (2 * np.pi) * fs_sdr     #calcolo la freq
 
 4. viene normalizzato tutto fra [-1, 1]
 
-Ora decodifichiamo applicando semplicemente la funzione inversa $$y = \operatorname{sign}(x) \cdot (1 / \mu) \cdot (1+\mu) ^ {|x| - 1}$$
+Ora decodifichiamo applicando semplicemente la funzione inversa $$y = \text{sign}(x) \cdot (1 / \mu) \cdot (1+\mu) ^ {|x| - 1}$$
 
 Infine normalizziamo rispetto al picco come prima e poi possiamo salvare e/o riprodurre immediatamente l'audio
 
