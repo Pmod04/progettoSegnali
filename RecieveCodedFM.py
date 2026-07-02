@@ -10,10 +10,10 @@ import math
 
 duration    = 10           # secondi da acquisire
 audio_fs    = 48000        # sample rate audio di uscita
-fm_dev      = 50000        # deviazione FM in Hz (stesso del TX!)
+fm_dev      = 50000        # deviazione FM in Hz
 lp_cutoff   = 6000         # taglio filtro passa-basso audio (Hz)
 lp_order    = 1000         # ordine filtro FIR
-mu          = 255          # parametro µ-Law (stesso del TX!)
+mu          = 255          # parametro µ-Law
 
 #Configurazione
 sdr = adi.Pluto("ip:192.168.3.1")
